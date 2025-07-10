@@ -1,17 +1,8 @@
-module "eks" {
-  source          = "terraform-aws-modules/eks/aws"
-  cluster_name    = var.cluster_name
-  cluster_version = "1.29"
-  subnets         = var.private_subnets
-  vpc_id          = var.vpc_id
+resource "aws_eks_cluster" "this" {
+  name     = var.cluster_name
+  role_arn = var.cluster_role_arn
 
-  eks_managed_node_groups = {
-    default = {
-      desired_size = 2
-      max_size     = 4
-      min_size     = 1
-
-      instance_types = ["t3.medium"]
-    }
+  vpc_config {
+    subnet_ids = var.private_subnets
   }
 }

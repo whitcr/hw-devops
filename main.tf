@@ -1,6 +1,36 @@
+provider "aws" {
+  region = "eu-north-1"
+}
+
+terraform {
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 5.0"
+    }
+  }
+}
+
+resource "aws_iam_role" "eks_cluster" {
+  name = "eksClusterRole"
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Effect = "Allow"
+        Principal = {
+          Service = "eks.amazonaws.com"
+        }
+        Action = "sts:AssumeRole"
+      }
+    ]
+  })
+}
+
+
 module "s3_backend" {
   source      = "./modules/s3-backend"
-  bucket_name = "Denis"
+  bucket_name = "lesson-terraform"
   table_name  = "terraform-locks"
 }
 
@@ -20,8 +50,8 @@ module "ecr" {
 }
 
 module "eks" {
-  source = "./modules/eks"
-  cluster_name     = "lesson-7-cluster"
-  vpc_id           = module.vpc.vpc_id
-  private_subnets  = module.vpc.private_subnets
+  source          = "./modules/eks"
+  cluster_name    = "lesson-7-cluster"
+  cluster_role_arn   = aws_iam_role.eks_cluster.arn
+  private_subnets = module.vpc.private_subnets
 }
