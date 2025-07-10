@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: django-config
+data:
+  DEBUG: {{ .Values.env.DEBUG | quote }}
+  DJANGO_SETTINGS_MODULE: {{ .Values.env.DJANGO_SETTINGS_MODULE | quote }}
+  ALLOWED_HOSTS: {{ .Values.env.ALLOWED_HOSTS | quote }}
