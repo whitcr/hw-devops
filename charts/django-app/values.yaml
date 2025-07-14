@@ -1,5 +1,5 @@
 image:
-  repository: 365528424244.dkr.ecr.us-west-2.amazonaws.com/django-app:latest
+  repository: 365528424244.dkr.ecr.eu-north-1.amazonaws.com/django-app:latest
   tag: latest
   pullPolicy: IfNotPresent
 
