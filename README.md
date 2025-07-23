@@ -66,6 +66,9 @@ Progect/
 │       └── values.yaml     # ConfigMap зі змінними середовища
 
 
+
+
+
 # Команди:
 
 terraform init
