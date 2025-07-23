@@ -68,19 +68,6 @@ Project/
 ```
 
 
-
-
-
-# Команди:
-
-terraform init
-
-terraform plan
-
-terraform apply
-
-terraform destroy
-
 # Модулі :
 
    * s3-backend -  модуль для зберігання стан інфраструктури в AWS S3
