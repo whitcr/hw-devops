@@ -264,14 +264,31 @@ Aurora Cluster (PostgreSQL-compatible, MySQL-compatible)
 
 
 # Встановлення Prometheus & Grafana:
-   * kubectl create namespace monitoring
-   * helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
-   * helm repo update
-   * helm install prometheus prometheus-community/prometheus --namespace monitoring
+```bash 
+kubectl create namespace monitoring
+```
+```bash
+helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+```
+```bash
+helm repo update
+```
+```bash
+helm install prometheus prometheus-community/prometheus --namespace monitoring
+```
 
-   * helm repo add grafana <https://grafana.github.io/helm-charts>
-   * helm repo update
+```bash
+helm repo add grafana <https://grafana.github.io/helm-charts>
+```
 
+```bash
+helm repo update
+```
 
-   * helm install grafana grafana/grafana --namespace monitoring --set adminPassword=admin123
-   * kubectl port-forward -n monitoring svc/grafana 3000:80
+```bash
+helm install grafana grafana/grafana --namespace monitoring --set adminPassword=admin123
+```
+
+```bash
+kubectl port-forward -n monitoring svc/grafana 3000:80
+```
