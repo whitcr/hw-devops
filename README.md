@@ -90,28 +90,35 @@ terraform destroy
 1. Збірка та завантаження 
 
 Аунтетіфікація Docker в ECR:
+
 ```aws ecr get-login-password --region <your-region> | docker login --username AWS --password-stdin <your-account-id>.dkr.ecr.<your-region>.amazonaws.com```
 
 Створення Docker image:
+
 ```docker build -t django-app .```
 
 Додавання тега до image:
+
 ```docker tag django-app:latest <your-account-id>.dkr.ecr.<your-region>.amazonaws.com/lesson-5-ecr-nat:latest```
 
 Завантаження image в ECR:
+
 ```docker push <your-account-id>.dkr.ecr.<your-region>.amazonaws.com/lesson-5-ecr-nat:latest```
 
 2. Конфігурація kubectl
 
 Оновлення kubeconfig в EKS кластері:
+
 ``` aws eks --region <your-region> update-kubeconfig --name <your-cluster-name>```
 
 Перевірка доступу к кластеру:
+
 ```kubectl get nodes```
 
 3. Deploy Django App за допомогою Helm
 
 Перейти в Helm chart directory:
+
 ```cd charts/django-app```
 
 Обновити values.yaml, додати ECR image repository та tag.
@@ -121,9 +128,11 @@ terraform destroy
 ```helm install nat .```
 
 Отримати external URL:
+
 ```kubectl get svc```
 
 Відкрити Django app за допомогую броузера:
+
 ```http://<external-dns>```
 
 # CI/CD для Django з Terraform + Jenkins + Argo CD
