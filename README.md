@@ -1,6 +1,7 @@
 # Структура проекту 
 
-Progect/
+```
+Project/
 │
 ├── main.tf                  # Головний файл для підключення модулів
 ├── backend.tf               # Налаштування бекенду для стейтів (S3 + DynamoDB
@@ -64,6 +65,7 @@ Progect/
 │       │   └── hpa.yaml
 │       ├── Chart.yaml
 │       └── values.yaml     # ConfigMap зі змінними середовища
+```
 
 
 
