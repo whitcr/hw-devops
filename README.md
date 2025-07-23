@@ -1,3 +1,125 @@
+# Структура проекту 
+
+Progect/
+│
+├── main.tf                  # Головний файл для підключення модулів
+├── backend.tf               # Налаштування бекенду для стейтів (S3 + DynamoDB
+├── outputs.tf               # Загальні виводи ресурсів
+│
+├── modules/                 # Каталог з усіма модулями
+│   ├── s3-backend/          # Модуль для S3 та DynamoDB
+│   │   ├── s3.tf            # Створення S3-бакета
+│   │   ├── dynamodb.tf      # Створення DynamoDB
+│   │   ├── variables.tf     # Змінні для S3
+│   │   └── outputs.tf       # Виведення інформації про S3 та DynamoDB
+│   │
+│   ├── vpc/                 # Модуль для VPC
+│   │   ├── vpc.tf           # Створення VPC, підмереж, Internet Gateway
+│   │   ├── routes.tf        # Налаштування маршрутизації
+│   │   ├── variables.tf     # Змінні для VPC
+│   │   └── outputs.tf  
+│   ├── ecr/                 # Модуль для ECR
+│   │   ├── ecr.tf           # Створення ECR репозиторію
+│   │   ├── variables.tf     # Змінні для ECR
+│   │   └── outputs.tf       # Виведення URL репозиторію
+│   │
+│   ├── eks/                      # Модуль для Kubernetes кластера
+│   │   ├── eks.tf                # Створення кластера
+│   │   ├── aws_ebs_csi_driver.tf # Встановлення плагіну csi drive
+│   │   ├── variables.tf     # Змінні для EKS
+│   │   └── outputs.tf       # Виведення інформації про кластер
+│   │
+│   ├── rds/                 # Модуль для RDS
+│   │   ├── rds.tf           # Створення RDS бази даних  
+│   │   ├── aurora.tf        # Створення aurora кластера бази даних  
+│   │   ├── shared.tf        # Спільні ресурси  
+│   │   ├── variables.tf     # Змінні (ресурси, креденшели, values)
+│   │   └── outputs.tf  
+│   │ 
+│   ├── jenkins/             # Модуль для Helm-установки Jenkins
+│   │   ├── jenkins.tf       # Helm release для Jenkins
+│   │   ├── variables.tf     # Змінні (ресурси, креденшели, values)
+│   │   ├── providers.tf     # Оголошення провайдерів
+│   │   ├── values.yaml      # Конфігурація jenkins
+│   │   └── outputs.tf       # Виводи (URL, пароль адміністратора)
+│   │ 
+│   └── argo_cd/             # Mодуль для Helm-установки Argo CD
+│       ├── argo_cd.tf       # Helm release для Argo CD
+│       ├── variables.tf     # Змінні (версія чарта, namespace, repo URL тощо)
+│       ├── providers.tf     # Kubernetes+Helm.  переносимо з модуля jenkins
+│       ├── values.yaml      # Кастомна конфігурація Argo CD
+│       ├── outputs.tf       # Виводи (hostname, initial admin password)
+│		    └──charts/                  # Helm-чарт для створення app'ів
+│ 	 	    ├── Chart.yaml
+│	  	    ├── values.yaml          # Список applications, repositories
+│			    └── templates/
+│		        ├── application.yaml
+│		        └── repository.yaml
+├── charts/
+│   └── django-app/
+│       ├── templates/
+│       │   ├── deployment.yaml
+│       │   ├── service.yaml
+│       │   ├── configmap.yaml
+│       │   └── hpa.yaml
+│       ├── Chart.yaml
+│       └── values.yaml     # ConfigMap зі змінними середовища
+
+
+# Команди:
+
+terraform init
+
+terraform plan
+
+terraform apply
+
+terraform destroy
+
+# Модулі :
+
+s3-backend -  модуль для зберігання стан інфраструктури в AWS S3
+vpc - створення приватних та публічних підмереж, шлюза та роутінг таблиця
+ecr - репозиторій для контейнерів
+
+1. Збірка та завантаження 
+
+Аунтетіфікація Docker в ECR:
+aws ecr get-login-password --region <your-region> | docker login --username AWS --password-stdin <your-account-id>.dkr.ecr.<your-region>.amazonaws.com
+
+Створення Docker image:
+docker build -t django-app .
+
+Додавання тега до image:
+docker tag django-app:latest <your-account-id>.dkr.ecr.<your-region>.amazonaws.com/lesson-5-ecr-nat:latest
+
+Завантаження image в ECR:
+docker push <your-account-id>.dkr.ecr.<your-region>.amazonaws.com/lesson-5-ecr-nat:latest
+
+2. Конфігурація kubectl
+
+Оновлення kubeconfig в EKS кластері:
+aws eks --region <your-region> update-kubeconfig --name <your-cluster-name>
+
+Перевірка доступу к кластеру:
+kubectl get nodes
+
+3. Deploy Django App за допомогою Helm
+
+Перейти в Helm chart directory:
+cd charts/django-app
+
+Обновити values.yaml, додати ECR image repository та tag.
+
+Зробити інстоляцію chart:
+
+helm install nat .
+
+Отримати external URL:
+kubectl get svc
+
+Відкрити Django app за допомогую броузера:
+http://<external-dns>
 
 # CI/CD для Django з Terraform + Jenkins + Argo CD
 
@@ -105,3 +227,17 @@ Aurora Cluster (PostgreSQL-compatible, MySQL-compatible)
 | Engine (PostgreSQL, MySQL) | Змінити `engine` та `engine_version`                |
 | Клас інстансу              | Змінити `instance_class` (наприклад, `db.t3.micro`) |
 | Назву бази                 | Оновити `db_name`                                   |
+
+
+# Встановлення Prometheus & Grafana:
+   * kubectl create namespace monitoring
+   * helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+   * helm repo update
+   * helm install prometheus prometheus-community/prometheus --namespace monitoring
+
+   * helm repo add grafana <https://grafana.github.io/helm-charts>
+   * helm repo update
+
+
+   * helm install grafana grafana/grafana --namespace monitoring --set adminPassword=admin123
+   * kubectl port-forward -n monitoring svc/grafana 3000:80
